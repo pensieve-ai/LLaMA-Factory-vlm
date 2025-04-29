@@ -85,6 +85,8 @@ class HuggingfaceEngine(BaseEngine):
         input_kwargs: Optional[dict[str, Any]] = {},
     ) -> tuple[dict[str, Any], int]:
         mm_input_dict = {"images": [], "videos": [], "audios": [], "imglens": [0], "vidlens": [0], "audlens": [0]}
+        # import logging
+        # logging.info(f"images len: {len(images)}")
         if images is not None:
             mm_input_dict.update({"images": images, "imglens": [len(images)]})
             if not any(IMAGE_PLACEHOLDER in message["content"] for message in messages):

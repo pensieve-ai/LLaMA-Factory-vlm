@@ -36,6 +36,9 @@ from ..extras.packages import (
     is_transformers_version_greater_than,
 )
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 
 if is_librosa_available():
     import librosa
@@ -307,6 +310,7 @@ class MMPluginMixin:
 
         """
         mm_inputs = {}
+        logging.info(f"len(images) in _get_mm_inputs: {len(images)}")
         if len(images) != 0:
             image_processor: BaseImageProcessor = getattr(processor, "image_processor", None)
             images = self._regularize_images(
@@ -1441,6 +1445,7 @@ class Qwen2VLPlugin(BasePlugin):
     ) -> dict[str, "torch.Tensor"]:
         image_processor: BaseImageProcessor = getattr(processor, "image_processor", None)
         mm_inputs = {}
+        logging.info(f"len(images) in _get_mm_inputs: {len(images)}")
         if len(images) != 0:
             images = self._regularize_images(
                 images,
@@ -1473,6 +1478,8 @@ class Qwen2VLPlugin(BasePlugin):
         audios: list["AudioInput"],
         processor: Optional["MMProcessor"],
     ) -> list[dict[str, str]]:
+        logging.info("processing messages")
+        logging.info(f"len(images): {len(images)}")
         self._validate_input(processor, images, videos, audios)
         num_image_tokens, num_video_tokens = 0, 0
         messages = deepcopy(messages)
@@ -1486,12 +1493,13 @@ class Qwen2VLPlugin(BasePlugin):
         else:
             image_grid_thw = [None] * len(images)
             video_grid_thw = [None] * len(videos)
-
+        logging.info(f"len(images): {len(image_grid_thw)}")
+        logging.info(f"num_image_tokens: {num_image_tokens}")
         for message in messages:
             content = message["content"]
             while IMAGE_PLACEHOLDER in content:
                 if num_image_tokens >= len(image_grid_thw):
-                    raise ValueError(f"`len(images)` is less than the number of {IMAGE_PLACEHOLDER} tokens.")
+                    raise ValueError(f"`len(images)` is less than the number of {IMAGE_PLACEHOLDER} tokens. Hmm..")
 
                 image_seqlen = image_grid_thw[num_image_tokens].prod() // merge_length if self.expand_mm_tokens else 1
                 content = content.replace(
